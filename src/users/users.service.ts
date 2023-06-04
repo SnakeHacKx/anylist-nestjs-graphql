@@ -9,6 +9,7 @@ import { User } from './entities/user.entity';
 import { SignupInput } from '../auth/dto/inputs/signup.input';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ValidRoles } from '../auth/enums/valid-roles.enum';
 
 @Injectable()
 export class UsersService {
@@ -34,8 +35,22 @@ export class UsersService {
     }
   }
 
-  async findAll(): Promise<User[]> {
-    return [];
+  async findAll(roles: ValidRoles[]): Promise<User[]> {
+
+    if(roles.length === 0) 
+      return this.userRepository.find({
+        //* No es necesario porque tenemos lazy la propiedad lastUpdateBy
+        // relations: {
+        //   lastUpdateBy: true // Le permite saber a GraphQL que debe cargar la relacion
+        // }
+      });
+
+    //* Tenemos roles
+
+    return this.userRepository.createQueryBuilder()
+      .andWhere('ARRAY[roles] && ARRAY[:...roles]') // filtrar los usuarios según los roles que coincidan
+      .setParameter('roles', roles)
+      .getMany();
   }
 
   async findOneByEmail(email: string): Promise<User> {
@@ -49,12 +64,48 @@ export class UsersService {
     }
   }
 
-  update(id: string, updateUserInput: UpdateUserInput) {
-    throw new Error('FindOne not implemented');
+  async findOneById(id: string): Promise<User> {
+    try {
+      return await this.userRepository.findOneByOrFail({ id });
+    } catch (error) {
+      this.handleDBErrors({
+        code: 'error-001',
+        detail: `${id} not found`
+      });
+    }
   }
 
-  block(id: string): Promise<User> {
-    throw new Error('FindOne not implemented');
+  async update(
+    id: string, 
+    updateUserInput: UpdateUserInput,
+    updateBy: User
+    ): Promise<User> {
+    try {
+      const user = await this.userRepository.preload({ 
+        ...updateUserInput,
+        id
+      });
+      
+      user.lastUpdateBy = updateBy;
+
+      return await this.userRepository.save(user);
+    } catch (error) {
+      this.handleDBErrors(error);
+    }
+  }
+
+  /**
+   * Bloquear a un usuario por ID, es equivalente al eliminar, solo que en este caso lo desactivamos para mantener la integridad referencial de la base de datos
+   * @param id ID del usuario a bloquear
+   */
+  async block(id: string, admin: User): Promise<User> {
+    const userToBlock = await this.findOneById(id);
+
+    userToBlock.isActive = false;
+
+    userToBlock.lastUpdateBy = admin;
+
+    return await this.userRepository.save(userToBlock);
   }
 
   private handleDBErrors(error: any): never {
