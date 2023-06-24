@@ -60,8 +60,8 @@ export class User {
   lastUpdateBy?: User;
 
   @OneToMany(() => Item, (item) => item.user, { lazy: true })
-  @Field(() => [Item], {
-    description: 'Items que posee el usuario',
-  })
+  // @Field(() => [Item], {
+  //   description: 'Items que posee el usuario',
+  // })
   items: Item[];
 }

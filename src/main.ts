@@ -8,7 +8,7 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
-      forbidNonWhitelisted: true,
+      // forbidNonWhitelisted: true, // Sirve para que usuarios no me manden informacion que no estoy pidiendo, lo comentamos ya que nos da un error y en realidad GRAPHQL ya nos hace esta validacion asi que no importa
     }),
   );
 

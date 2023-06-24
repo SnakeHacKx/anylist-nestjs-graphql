@@ -20,10 +20,8 @@ type User {
 
   """ID del último usuario que editó a un usuario específico"""
   lastUpdateBy: User
-
-  """Items que posee el usuario"""
-  items: [Item!]!
   itemCount: Int!
+  items(offset: Int = 0, limit: Int = 10, search: String): [Item!]!
 }
 
 type Item {
@@ -45,12 +43,25 @@ type AuthResponse {
   user: User!
 }
 
+type List {
+  """Identificador único de la lista"""
+  id: ID!
+
+  """Nombre de la lista"""
+  name: ID!
+
+  """Usuario que tiene la lista"""
+  user: User!
+}
+
 type Query {
   revalidate: AuthResponse!
   users(roles: [ValidRoles!] = []): [User!]!
   user(id: ID!): User!
-  items: [Item!]!
+  items(offset: Int = 0, limit: Int = 10, search: String): [Item!]!
   item(id: ID!): Item!
+  lists: [List!]!
+  list(id: Int!): List!
 }
 
 enum ValidRoles {
@@ -70,6 +81,9 @@ type Mutation {
 
   """Ejecuta la construccióN de la base de datos"""
   executeSeed: Boolean!
+  createList(createListInput: CreateListInput!): List!
+  updateList(updateListInput: UpdateListInput!): List!
+  removeList(id: Int!): List!
 }
 
 input SignupInput {
@@ -101,4 +115,15 @@ input UpdateItemInput {
   name: String
   quantityUnits: String
   id: ID!
+}
+
+input CreateListInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input UpdateListInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
 }
