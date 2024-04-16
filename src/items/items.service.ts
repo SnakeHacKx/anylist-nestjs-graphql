@@ -25,7 +25,7 @@ export class ItemsService {
    * Muestra todos los items de un usuario especifico
    * @param user usuario actual que consulta todos los items
    */
-  async findAll(
+  findAll(
     user: User,
     paginationArgs: PaginationArgs,
     searchArgs: SearchArgs,

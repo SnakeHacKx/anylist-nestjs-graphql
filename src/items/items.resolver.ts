@@ -17,7 +17,7 @@ export class ItemsResolver {
   @Mutation(() => Item, {name: 'createItem'})
   async createItem(
     @Args('createItemInput') createItemInput: CreateItemInput,
-    @CurrentUser() user: User 
+    @CurrentUser() user: User
   ): Promise<Item> {
     return this.itemsService.create(createItemInput, user);
   }

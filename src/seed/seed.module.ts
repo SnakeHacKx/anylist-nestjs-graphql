@@ -6,9 +6,17 @@ import { SeedResolver } from './seed.resolver';
 
 import { UsersModule } from './../users/users.module';
 import { ItemsModule } from './../items/items.module';
+import { ListItemModule } from 'src/list-item/list-item.module';
+import { ListsModule } from 'src/lists/lists.module';
 
 @Module({
   providers: [SeedResolver, SeedService],
-  imports: [ConfigModule, UsersModule, ItemsModule]
+  imports: [
+    ConfigModule,
+    ItemsModule,
+    ListItemModule,
+    ListsModule,
+    UsersModule,
+  ],
 })
 export class SeedModule {}

@@ -22,6 +22,8 @@ import { ValidRoles } from '../auth/enums/valid-roles.enum';
 import { ItemsService } from '../items/items.service';
 import { Item } from '../items/entities/item.entity';
 import { PaginationArgs, SearchArgs } from '../common/dto/args';
+import { ListsService } from 'src/lists/lists.service';
+import { List } from 'src/lists/entities/list.entity';
 
 @Resolver(() => User)
 @UseGuards(JwtAuthGuard)
@@ -29,6 +31,7 @@ export class UsersResolver {
   constructor(
     private readonly usersService: UsersService,
     private readonly itemsService: ItemsService,
+    private readonly listsService: ListsService,
   ) {}
 
   //* Los argumentos en Nest siempre se reciben como string, al menos que lo convirtamos
@@ -44,7 +47,7 @@ export class UsersResolver {
   @Query(() => User, { name: 'user' })
   findOne(
     @Args('id', { type: () => ID }, ParseUUIDPipe) id: string,
-    @CurrentUser([ValidRoles.admin, ValidRoles.superuser]) user: User,
+    @CurrentUser([ValidRoles.admin, ValidRoles.superUser]) user: User,
   ): Promise<User> {
     return this.usersService.findOneById(id);
   }
@@ -86,5 +89,24 @@ export class UsersResolver {
     @Args() searchArgs: SearchArgs
   ): Promise<Item[]> {
     return this.itemsService.findAll(user, paginationArgs, searchArgs);
+  }
+
+  @ResolveField(() => [List], { name: 'lists' })
+  async getListsByUser(
+    @CurrentUser([ValidRoles.admin]) admin: User,
+    @Parent() user: User,
+    @Args() paginationArgs: PaginationArgs,
+    @Args() searchArgs: SearchArgs
+  ): Promise<List[]> {
+    return this.listsService.findAll(user, paginationArgs, searchArgs);
+  }
+
+  @ResolveField(() => Int, { name: 'listCount' })
+  async listCount(
+    // Nos permite tener la informacion del padre, en este caso se esta creando dentro de user
+    @CurrentUser([ValidRoles.admin]) admin: User, // Aunque no lo estemos utilzando, nos hace la validacion
+    @Parent() user: User,
+  ): Promise<number> {
+    return this.listsService.listsCountByUser(user);
   }
 }

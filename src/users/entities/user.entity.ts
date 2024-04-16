@@ -1,5 +1,6 @@
 import { ObjectType, Field, Int, ID } from '@nestjs/graphql';
 import { Item } from 'src/items/entities/item.entity';
+import { List } from 'src/lists/entities/list.entity';
 import {
   Column,
   Entity,
@@ -42,7 +43,7 @@ export class User {
   @Field(() => Boolean, {
     description: 'Indica si el usuario está activo o no en la aplicación',
   })
-  isActive: boolean;
+  isActive: boolean = true;
 
   //TODO: relaciones
   // eager me permite cargar las relacions automaticamente, pero solo funciona en una sola via,
@@ -64,4 +65,10 @@ export class User {
   //   description: 'Items que posee el usuario',
   // })
   items: Item[];
+
+  @OneToMany(() => List, (list) => list.user)
+  // @Field(() => [Item], {
+  //   description: 'Listas que posee el usuario',
+  // })
+  lists: List[];
 }

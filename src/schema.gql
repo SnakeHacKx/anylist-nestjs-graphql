@@ -22,6 +22,29 @@ type User {
   lastUpdateBy: User
   itemCount: Int!
   items(offset: Int = 0, limit: Int = 10, search: String): [Item!]!
+  lists(offset: Int = 0, limit: Int = 10, search: String): [List!]!
+  listCount: Int!
+}
+
+type List {
+  """Identificador único de la lista"""
+  id: ID!
+
+  """Nombre de la lista"""
+  name: String!
+
+  """Usuario que tiene la lista"""
+  user: User!
+  items(offset: Int = 0, limit: Int = 10, search: String): [ListItem!]!
+  totalItems: Float!
+}
+
+type ListItem {
+  id: ID!
+  quantity: Float!
+  completed: Boolean!
+  list: List!
+  item: Item!
 }
 
 type Item {
@@ -36,21 +59,11 @@ type Item {
 
   """Usuario que tiene el item"""
   user: User!
+  listItem: [ListItem!]!
 }
 
 type AuthResponse {
   token: String!
-  user: User!
-}
-
-type List {
-  """Identificador único de la lista"""
-  id: ID!
-
-  """Nombre de la lista"""
-  name: ID!
-
-  """Usuario que tiene la lista"""
   user: User!
 }
 
@@ -60,14 +73,15 @@ type Query {
   user(id: ID!): User!
   items(offset: Int = 0, limit: Int = 10, search: String): [Item!]!
   item(id: ID!): Item!
-  lists: [List!]!
-  list(id: Int!): List!
+  lists(offset: Int = 0, limit: Int = 10, search: String): [List!]!
+  list(id: ID!): List!
+  listItem(id: String!): ListItem!
 }
 
 enum ValidRoles {
   admin
   user
-  superuser
+  superUser
 }
 
 type Mutation {
@@ -78,12 +92,14 @@ type Mutation {
   createItem(createItemInput: CreateItemInput!): Item!
   updateItem(updateItemInput: UpdateItemInput!): Item!
   removeItem(id: ID!): Item!
+  createList(createListInput: CreateListInput!): List!
+  updateList(updateItemInput: UpdateListInput!): List!
+  removeList(id: ID!): List!
+  createListItem(createListItemInput: CreateListItemInput!): ListItem!
+  updateListItem(updateListItemInput: UpdateListItemInput!): ListItem!
 
   """Ejecuta la construccióN de la base de datos"""
   executeSeed: Boolean!
-  createList(createListInput: CreateListInput!): List!
-  updateList(updateListInput: UpdateListInput!): List!
-  removeList(id: Int!): List!
 }
 
 input SignupInput {
@@ -118,12 +134,25 @@ input UpdateItemInput {
 }
 
 input CreateListInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  name: String!
 }
 
 input UpdateListInput {
-  """Example field (placeholder)"""
-  exampleField: Int
-  id: Int!
+  name: String
+  id: ID!
+}
+
+input CreateListItemInput {
+  quantity: Float = 0
+  completed: Boolean = false
+  listId: ID!
+  itemId: ID!
+}
+
+input UpdateListItemInput {
+  quantity: Float = 0
+  completed: Boolean = false
+  listId: ID
+  itemId: ID
+  id: ID!
 }

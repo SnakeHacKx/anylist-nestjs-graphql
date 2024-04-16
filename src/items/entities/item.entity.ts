@@ -1,6 +1,14 @@
 import { ObjectType, Field, ID, Float } from '@nestjs/graphql';
+import { ListItem } from 'src/list-item/entities/list-item.entity';
 import { User } from 'src/users/entities/user.entity';
-import { Column, Entity, Index, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity({ name: 'items' })
 @ObjectType()
@@ -26,12 +34,16 @@ export class Item {
   })
   quantityUnits?: string;
 
-  @ManyToOne(() => User, (user) => user.items, {nullable: false, lazy: true})
-  // Maneja un indice para que cuando se haga una consulta, se sepa que se va a 
+  @ManyToOne(() => User, (user) => user.items, { nullable: false, lazy: true })
+  // Maneja un indice para que cuando se haga una consulta, se sepa que se va a
   // hacer por esta columna y las consultas sean mas rapidas
-  @Index('userId-index') 
+  @Index('userId-index')
   @Field(() => User, {
     description: 'Usuario que tiene el item',
   })
   user: User;
+
+  @OneToMany(() => ListItem, (listItem) => listItem.item, { lazy: true })
+  @Field(() => [ListItem])
+  listItem: ListItem[];
 }
